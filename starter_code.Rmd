@@ -9,6 +9,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(fs)
 library(gt)
 library(tidymodels)
+library(rsample)
 library(tidyverse)
 ```
 
@@ -127,4 +128,36 @@ metrics(x_2, truth = dvote, estimate = pred_dvote) %>%
 # Much better! Repo before class.
 
 ```
+
+```{r}
+logistic_reg() %>%
+  set_engine("glm") %>%
+  fit(data = clean, dvote ~ gender + party + state + office) %>%
+  predict(new_data = clean) %>%
+  bind_cols(clean) %>%
+  metrics(truth = dvote, estimate = .pred_class) %>%
+  gt() %>% 
+    tab_header("Model 2 Evaluation on All Data")
+
+```
+
+
+```{r}
+# Using 1% of the data using initial_split()
+
+n_split <- initial_split(clean, prop = 1/100)
+
+sample_data <- training(n_split)
+
+  logistic_reg(mode = "classification") %>%
+  set_engine("glm") %>%
+  fit(data = sample_data, dvote ~ gender + 
+        party + state + office) %>%
+  predict(new_data = sample_data) %>%
+  bind_cols(sample_data) %>%
+  metrics(truth = dvote, estimate = .pred_class) %>%
+  gt() %>% 
+    tab_header("Model 2 Evaluation on All Data")
+```
+
 
