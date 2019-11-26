@@ -145,19 +145,35 @@ logistic_reg() %>%
 ```{r}
 # Using 1% of the data using initial_split()
 
+set.seed(10)
+
 n_split <- initial_split(clean, prop = 1/100)
 
 sample_data <- training(n_split)
 
-  logistic_reg(mode = "classification") %>%
+logistic_reg() %>%
   set_engine("glm") %>%
-  fit(data = sample_data, dvote ~ gender + 
-        party + state + office) %>%
+  fit(dvote ~ gender + party + state + office, data = sample_data) %>%
   predict(new_data = sample_data) %>%
   bind_cols(sample_data) %>%
   metrics(truth = dvote, estimate = .pred_class) %>%
   gt() %>% 
-    tab_header("Model 2 Evaluation on All Data")
+    tab_header("Model 2 Evaluation on Training Data")
+  
 ```
+
+```{r}
+
+logistic_reg() %>%
+  set_engine("glm") %>%
+  fit(dvote ~ gender + party + state + office, data = sample_data) %>%
+  predict(new_data = testing(n_split)) %>%
+  bind_cols(testing(n_split)) %>%
+  metrics(truth = dvote, estimate = .pred_class) %>%
+  gt() %>% 
+    tab_header("Model 2 Evaluation on Testing Data")
+
+```
+
 
 
